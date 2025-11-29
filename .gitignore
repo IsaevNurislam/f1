@@ -1,0 +1,33 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+.venv311/
+venv/
+ENV/
+env/
+
+# FastF1 cache
+.fastf1-cache/
+
+# Output files
+output_animation.mp4
+still_frame.png
+computed_data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
