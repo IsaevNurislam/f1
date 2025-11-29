@@ -208,7 +208,10 @@ class RaceReplay {
             const y = (pos.y - minY) * this.scale + this.padding;
             
             const driver = this.data.drivers[driverCode];
-            if (!driver) return;
+            if (!driver) {
+                console.warn(`Driver not found: ${driverCode}`, 'Available:', Object.keys(this.data.drivers));
+                return;
+            }
             
             const color = driver.color || '#FFFFFF';
             const isSelected = this.selectedDriver === driverCode;

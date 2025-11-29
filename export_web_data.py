@@ -32,13 +32,14 @@ def export_to_json(year=2025, round_number=12, output_file="docs/data/race_data.
     else:
         track_points = []
     
-    # Get driver info
+    # Get driver info - use abbreviation as key to match frame data
     drivers = session.drivers
     driver_info = {}
     for driver_num in drivers:
         driver = session.get_driver(driver_num)
-        driver_info[driver_num] = {
-            "abbreviation": driver['Abbreviation'],
+        driver_code = driver['Abbreviation']
+        driver_info[driver_code] = {
+            "abbreviation": driver_code,
             "team": driver['TeamName'],
             "full_name": driver['FullName'],
             "number": driver_num,
@@ -49,8 +50,8 @@ def export_to_json(year=2025, round_number=12, output_file="docs/data/race_data.
     frames_data = []
     frame_count = len(race_telemetry['frames'])
     
-    # Sample every Nth frame to reduce size (keep 1 frame per second, assuming 10fps)
-    sample_rate = 10
+    # Sample every Nth frame to reduce size (keep 1 frame every 2 seconds for smoother loading)
+    sample_rate = 50
     
     for i, frame in enumerate(race_telemetry['frames']):
         if i % sample_rate != 0 and i != frame_count - 1:
