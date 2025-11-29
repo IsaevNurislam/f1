@@ -35,15 +35,24 @@ def export_to_json(year=2025, round_number=12, output_file="docs/data/race_data.
     # Get driver info - use abbreviation as key to match frame data
     drivers = session.drivers
     driver_info = {}
+    
+    # Get driver colors using fastf1's color mapping
+    import fastf1.plotting
+    color_map = fastf1.plotting.get_driver_color_mapping(session)
+    
     for driver_num in drivers:
         driver = session.get_driver(driver_num)
         driver_code = driver['Abbreviation']
+        
+        # Get color from the color map (uses abbreviation as key)
+        color_hex = color_map.get(driver_code, '#FFFFFF')
+        
         driver_info[driver_code] = {
             "abbreviation": driver_code,
             "team": driver['TeamName'],
             "full_name": driver['FullName'],
             "number": driver_num,
-            "color": race_telemetry['driver_colors'].get(driver_num, '#FFFFFF')
+            "color": color_hex
         }
     
     # Process frames - limit to reduce file size
