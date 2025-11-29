@@ -135,11 +135,12 @@ class RaceReplay {
         if (!this.isPlaying) return;
         
         const deltaTime = currentTime - this.lastFrameTime;
-        // Adjusted for new sample rate (2 frames per second instead of 10)
-        const frameIncrement = Math.floor(deltaTime / (1000 / 2) * this.playbackSpeed);
+        // Sample rate 50 = 1 frame per 2 seconds of race time
+        // Show each frame for 100ms at normal speed (20x slower than real time)
+        const msPerFrame = 100 / this.playbackSpeed;
         
-        if (frameIncrement > 0) {
-            this.currentFrame += frameIncrement;
+        if (deltaTime >= msPerFrame) {
+            this.currentFrame++;
             this.lastFrameTime = currentTime;
             
             if (this.currentFrame >= this.data.frames.length) {
