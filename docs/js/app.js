@@ -5,6 +5,7 @@ class RaceReplay {
         this.ctx = this.canvas.getContext('2d');
         this.data = null;
         this.currentFrame = 0;
+        this.frameProgress = 0; // For smooth interpolation
         this.isPlaying = false;
         this.playbackSpeed = 1.0;
         this.selectedDriver = null;
@@ -136,21 +137,27 @@ class RaceReplay {
         
         const deltaTime = currentTime - this.lastFrameTime;
         // Sample rate 50 = 1 frame per 2 seconds of race time
-        // Show each frame for 100ms at normal speed (20x slower than real time)
+        // Progress through frames smoothly at 60 FPS
         const msPerFrame = 100 / this.playbackSpeed;
+        const progressIncrement = (deltaTime / msPerFrame);
         
-        if (deltaTime >= msPerFrame) {
+        this.frameProgress += progressIncrement;
+        this.lastFrameTime = currentTime;
+        
+        // Move to next frame when progress >= 1
+        while (this.frameProgress >= 1.0) {
             this.currentFrame++;
-            this.lastFrameTime = currentTime;
+            this.frameProgress -= 1.0;
             
-            if (this.currentFrame >= this.data.frames.length) {
+            if (this.currentFrame >= this.data.frames.length - 1) {
                 this.currentFrame = this.data.frames.length - 1;
+                this.frameProgress = 0;
                 this.pause();
+                break;
             }
-            
-            this.render();
         }
         
+        this.render();
         requestAnimationFrame((time) => this.animate(time));
     }
 
@@ -163,8 +170,9 @@ class RaceReplay {
         // Draw track
         this.drawTrack();
         
-        // Draw cars
-        this.drawCars(frame);
+        // Draw cars with interpolation
+        const nextFrame = this.data.frames[this.currentFrame + 1];
+        this.drawCars(frame, nextFrame, this.frameProgress);
         
         // Update UI
         this.updateRaceInfo(frame);
@@ -198,15 +206,27 @@ class RaceReplay {
         this.ctx.stroke();
     }
 
-    drawCars(frame) {
+    drawCars(frame, nextFrame, progress) {
         const { minX, minY } = this.trackBounds;
         const positions = frame.positions;
         
         Object.entries(positions).forEach(([driverCode, pos]) => {
             if (pos.x === null || pos.y === null) return;
             
-            const x = (pos.x - minX) * this.scale + this.padding;
-            const y = (pos.y - minY) * this.scale + this.padding;
+            // Interpolate position for smooth movement
+            let x = pos.x;
+            let y = pos.y;
+            
+            if (nextFrame && nextFrame.positions[driverCode] && progress > 0) {
+                const nextPos = nextFrame.positions[driverCode];
+                if (nextPos.x !== null && nextPos.y !== null) {
+                    x = pos.x + (nextPos.x - pos.x) * progress;
+                    y = pos.y + (nextPos.y - pos.y) * progress;
+                }
+            }
+            
+            x = (x - minX) * this.scale + this.padding;
+            y = (y - minY) * this.scale + this.padding;
             
             const driver = this.data.drivers[driverCode];
             if (!driver) {
