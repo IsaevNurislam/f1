@@ -45,7 +45,26 @@ pip install -r requirements.txt
 
 FastF1 cache folder will be created automatically on first run. If it is not created, you can manually create a folder named `.fastf1-cache` in the project root.
 
-## Usage
+## Quick Start
+
+### Windows Users (Easy Method)
+1. **Clone this repository:**
+   ```bash
+   git clone https://github.com/IsaevNurislam/f1.git
+   cd f1
+   ```
+
+2. **Run setup (first time only):**
+   ```bash
+   setup.bat
+   ```
+
+3. **Run the application:**
+   ```bash
+   run.bat
+   ```
+
+### Manual Setup (All Platforms)
 
 Run the main script and specify the year and round:
 ```bash
