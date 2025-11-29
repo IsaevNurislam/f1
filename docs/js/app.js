@@ -34,6 +34,7 @@ class RaceReplay {
             
             this.setupCanvas();
             this.setupEventListeners();
+                this.setupLeaderboardClickHandler();
             this.updateEventInfo();
             this.render();
         } catch (error) {
@@ -77,14 +78,23 @@ class RaceReplay {
     }
 
     setupEventListeners() {
-        document.getElementById('btn-play').addEventListener('click', () => this.play());
-        document.getElementById('btn-pause').addEventListener('click', () => this.pause());
-        document.getElementById('btn-restart').addEventListener('click', () => this.restart());
+        const playBtn = document.getElementById('btn-play');
+        const pauseBtn = document.getElementById('btn-pause');
+        const restartBtn = document.getElementById('btn-restart');
+
+        const bindTap = (el, handler) => {
+            el.addEventListener('click', handler);
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); handler(); }, { passive: false });
+        };
+
+        bindTap(playBtn, () => this.play());
+        bindTap(pauseBtn, () => this.pause());
+        bindTap(restartBtn, () => this.restart());
         
-        document.getElementById('btn-slower').addEventListener('click', () => this.setSpeed(0.5));
-        document.getElementById('btn-normal').addEventListener('click', () => this.setSpeed(1.0));
-        document.getElementById('btn-faster').addEventListener('click', () => this.setSpeed(2.0));
-        document.getElementById('btn-fastest').addEventListener('click', () => this.setSpeed(4.0));
+        bindTap(document.getElementById('btn-slower'), () => this.setSpeed(0.5));
+        bindTap(document.getElementById('btn-normal'), () => this.setSpeed(1.0));
+        bindTap(document.getElementById('btn-faster'), () => this.setSpeed(2.0));
+        bindTap(document.getElementById('btn-fastest'), () => this.setSpeed(4.0));
         
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
@@ -100,6 +110,17 @@ class RaceReplay {
             }
         });
     }
+
+        setupLeaderboardClickHandler() {
+            // Use event delegation for driver clicks
+            document.getElementById('leaderboard-list').addEventListener('click', (e) => {
+                const driverRow = e.target.closest('.driver-row');
+                if (driverRow) {
+                    const driverCode = driverRow.dataset.driver;
+                    this.selectDriver(driverCode);
+                }
+            });
+        }
 
     updateEventInfo() {
         const event = this.data.event;
@@ -295,14 +316,6 @@ class RaceReplay {
         }).join('');
         
         document.getElementById('leaderboard-list').innerHTML = leaderboardHtml;
-        
-        // Add click handlers
-        document.querySelectorAll('.driver-row').forEach(row => {
-            row.addEventListener('click', () => {
-                const driverCode = row.dataset.driver;
-                this.selectDriver(driverCode);
-            });
-        });
     }
 
     getTyreClass(tyreCode) {
