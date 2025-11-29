@@ -45,6 +45,12 @@ pip install -r requirements.txt
 
 FastF1 cache folder will be created automatically on first run. If it is not created, you can manually create a folder named `.fastf1-cache` in the project root.
 
+## 🌐 Live Demo
+
+**[View Interactive Web Demo](https://isaevnurislam.github.io/f1/)**
+
+Click the link above to see the race replay in your browser - no installation required!
+
 ## Quick Start
 
 ### Windows Users (Easy Method)
