@@ -15,8 +15,20 @@ class RaceReplay {
 
     async init() {
         try {
+            document.getElementById('loading').textContent = 'Loading race data...';
             const response = await fetch('data/race_data.json');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            document.getElementById('loading').textContent = 'Processing data...';
             this.data = await response.json();
+            
+            if (!this.data || !this.data.frames || this.data.frames.length === 0) {
+                throw new Error('Invalid or empty race data');
+            }
+            
             document.getElementById('loading').style.display = 'none';
             
             this.setupCanvas();
@@ -25,7 +37,12 @@ class RaceReplay {
             this.render();
         } catch (error) {
             console.error('Error loading race data:', error);
-            document.getElementById('loading').textContent = 'Error loading data. Please refresh.';
+            document.getElementById('loading').innerHTML = `
+                ⚠️ Error loading race data<br>
+                <small>${error.message}</small><br>
+                <small>Check browser console for details</small>
+            `;
+            document.getElementById('loading').style.color = '#ff0050';
         }
     }
 
@@ -118,7 +135,8 @@ class RaceReplay {
         if (!this.isPlaying) return;
         
         const deltaTime = currentTime - this.lastFrameTime;
-        const frameIncrement = Math.floor(deltaTime / (1000 / 25) * this.playbackSpeed);
+        // Adjusted for new sample rate (2 frames per second instead of 10)
+        const frameIncrement = Math.floor(deltaTime / (1000 / 2) * this.playbackSpeed);
         
         if (frameIncrement > 0) {
             this.currentFrame += frameIncrement;
@@ -243,7 +261,7 @@ class RaceReplay {
             const isSelected = this.selectedDriver === driverCode;
             
             return `
-                <div class="driver-row ${isSelected ? 'selected' : ''}" data-driver="${driverCode}">
+                <div class="driver-row ${isSelected ? 'selected' : ''}" data-driver="${driverCode}" title="${driver.full_name} - ${driver.team}">
                     <span class="position">${pos.position}</span>
                     <div class="driver-color" style="background: ${driver.color}"></div>
                     <span class="driver-name">${driver.abbreviation}</span>
